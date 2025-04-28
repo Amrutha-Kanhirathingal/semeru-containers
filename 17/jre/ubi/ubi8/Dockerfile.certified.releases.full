@@ -1,4 +1,4 @@
-# (C) Copyright IBM Corporation 2021, 2025
+# (C) Copyright IBM Corporation 2021, 2024
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-FROM registry.access.redhat.com/ubi8/ubi:latest AS base-image
+FROM registry.access.redhat.com/ubi8/ubi:latest
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
@@ -26,35 +26,33 @@ RUN dnf install -y \
 
 LABEL name="IBM Semeru Runtime Certified Edition" \
       vendor="International Business Machines Corporation" \
-      version="17.0.14.0" \
+      version="17.0.12.0" \
       release="17" \
-      maintainer="jayasg12@in.ibm.com" \
       run="docker run --rm -ti <image_name:tag> /bin/bash" \
       summary="IBM Semeru Runtime Certified Docker Image for OpenJDK with openj9 and ubi" \
       description="For more information on this image please see https://github.com/ibmruntimes/semeru-containers/blob/master/README.md"
 
 # Install CRIU
 RUN --mount=type=secret,id=criu_secrets source /run/secrets/criu_secrets; \
-    set -eux; \
     ARCH="$(uname -m)"; \
     case "${ARCH}" in \
       amd64|x86_64|ppc64el|ppc64le|s390x|aarch64|arm64) \
         case "${ARCH}" in \
         amd64|x86_64) \
-          CRIU_URL='https://na.artifactory.swg-devops.com/artifactory/hyc-rt-java-delivery-generic-local/IBM/java/criu_build/45/x64_linux/ubi8/criu.tar.gz'; \
-          CRIU_SHA_URL='https://na.artifactory.swg-devops.com/artifactory/hyc-rt-java-delivery-generic-local/IBM/java/criu_build/45/x64_linux/ubi8/criu.tar.gz.sha256.txt'; \
+          CRIU_URL='https://na-public.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/hyc-runtimes-jenkins.swg-devops.com/build-scripts/criu_build/36/x64_linux/ubi8/criu.tar.gz'; \
+          CRIU_SHA_URL='https://na-public.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/hyc-runtimes-jenkins.swg-devops.com/build-scripts/criu_build/36/x64_linux/ubi8/criu.tar.gz.sha256.txt'; \
           ;; \
         ppc64el|ppc64le) \
-          CRIU_URL='https://na.artifactory.swg-devops.com/artifactory/hyc-rt-java-delivery-generic-local/IBM/java/criu_build/45/ppc64le_linux/ubi8/criu.tar.gz'; \
-          CRIU_SHA_URL='https://na.artifactory.swg-devops.com/artifactory/hyc-rt-java-delivery-generic-local/IBM/java/criu_build/45/ppc64le_linux/ubi8/criu.tar.gz.sha256.txt'; \
+          CRIU_URL='https://na-public.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/hyc-runtimes-jenkins.swg-devops.com/build-scripts/criu_build/30/ppc64le_linux/criu.tar.gz'; \
+          CRIU_SHA_URL='https://na-public.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/hyc-runtimes-jenkins.swg-devops.com/build-scripts/criu_build/30/ppc64le_linux/criu.tar.gz.sha256.txt'; \
           ;; \
         s390x) \
-          CRIU_URL='https://na.artifactory.swg-devops.com/artifactory/hyc-rt-java-delivery-generic-local/IBM/java/criu_build/45/s390x_linux/ubi8/criu.tar.gz'; \
-          CRIU_SHA_URL='https://na.artifactory.swg-devops.com/artifactory/hyc-rt-java-delivery-generic-local/IBM/java/criu_build/45/s390x_linux/ubi8/criu.tar.gz.sha256.txt'; \
+          CRIU_URL='https://na-public.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/hyc-runtimes-jenkins.swg-devops.com/build-scripts/criu_build/36/s390x_linux/ubi8/criu.tar.gz'; \
+          CRIU_SHA_URL='https://na-public.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/hyc-runtimes-jenkins.swg-devops.com/build-scripts/criu_build/36/s390x_linux/ubi8/criu.tar.gz.sha256.txt'; \
           ;; \
         aarch64) \
-          CRIU_URL='https://na.artifactory.swg-devops.com/artifactory/hyc-rt-java-delivery-generic-local/IBM/java/criu_build/45/aarch64_linux/ubi8/criu.tar.gz'; \
-          CRIU_SHA_URL='https://na.artifactory.swg-devops.com/artifactory/hyc-rt-java-delivery-generic-local/IBM/java/criu_build/45/aarch64_linux/ubi8/criu.tar.gz.sha256.txt'; \
+          CRIU_URL='https://na-public.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/hyc-runtimes-jenkins.swg-devops.com/build-scripts/criu_build/36/aarch64_linux/ubi8/criu.tar.gz'; \
+          CRIU_SHA_URL='https://na-public.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/hyc-runtimes-jenkins.swg-devops.com/build-scripts/criu_build/36/aarch64_linux/ubi8/criu.tar.gz.sha256.txt'; \
           ;; \
         *) \
           echo "CRIU is not supported on: ${ARCH}"; \
@@ -81,26 +79,26 @@ RUN --mount=type=secret,id=criu_secrets source /run/secrets/criu_secrets; \
 
 ENV PATH="/usr/local/sbin:$PATH"
 
-ENV JAVA_VERSION 17.0.14.0
+ENV JAVA_VERSION 17.0.12.0
 
 RUN set -eux; \
     ARCH="$(uname -m)"; \
     case "${ARCH}" in \
        aarch64|arm64) \
-         ESUM='9ff8137e5560177386b4d97992f319fbf63f4608bb1cac6eb67c76a15323fd8d'; \
-         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.14%2B7_openj9-0.49.0/ibm-semeru-certified-jre_aarch64_linux_17.0.14.0.tar.gz'; \
+         ESUM='7662dc78f80ee5e414160aef4cd0d9b5621ae23e1f7e192eb1f52afaf30524b7'; \
+         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.12%2B7_openj9-0.46.0/ibm-semeru-certified-jre_aarch64_linux_17.0.12.0.tar.gz'; \
          ;; \
        amd64|x86_64) \
-         ESUM='13e5e947c6c1e6f3dbee1487b890492798f218810978558fdbb85abc74166e38'; \
-         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.14%2B7_openj9-0.49.0/ibm-semeru-certified-jre_x64_linux_17.0.14.0.tar.gz'; \
+         ESUM='7fb68c02b60420f7284bce2caeac81ac910fd0c0e6790aaefe03dd3cc2295ee4'; \
+         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.12%2B7_openj9-0.46.0/ibm-semeru-certified-jre_x64_linux_17.0.12.0.tar.gz'; \
          ;; \
        ppc64el|ppc64le) \
-         ESUM='bf5726fb296b3f9872bfcbbaa392176dd8474168515cf6ccddd41b70f4039cfa'; \
-         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.14%2B7_openj9-0.49.0/ibm-semeru-certified-jre_ppc64le_linux_17.0.14.0.tar.gz'; \
+         ESUM='2c11cc1812349073f5f23d209913430ba89c6cfb239a2ffa117247881c494a78'; \
+         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.12%2B7_openj9-0.46.0/ibm-semeru-certified-jre_ppc64le_linux_17.0.12.0.tar.gz'; \
          ;; \
        s390x) \
-         ESUM='79a3f26c4eebba1771c887ab92516209b1efc1b57b10d53315601c9ea9a81592'; \
-         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.14%2B7_openj9-0.49.0/ibm-semeru-certified-jre_s390x_linux_17.0.14.0.tar.gz'; \
+         ESUM='032bcc777615b0b2909e343ea53493a69c4805487914a21f0f62e96984d2c005'; \
+         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.12%2B7_openj9-0.46.0/ibm-semeru-certified-jre_s390x_linux_17.0.12.0.tar.gz'; \
          ;; \
        *) \
          echo "Unsupported arch: ${ARCH}"; \
@@ -132,8 +130,8 @@ RUN set -eux; \
     SCC_SIZE="50m"; \
     DOWNLOAD_PATH_TOMCAT=/tmp/tomcat; \
     INSTALL_PATH_TOMCAT=/opt/tomcat-home; \
-    TOMCAT_CHECKSUM="cbe407f17c813d9f83cab459e603df171f2e5782c3a0cdb4cfa00b0391a89cedf865c6d8972fc7e12210c69a8467ede5939f35bb0f3b41fa173b9ee83199768a"; \
-    TOMCAT_DWNLD_URL="https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.102/bin/apache-tomcat-9.0.102.tar.gz"; \
+    TOMCAT_CHECKSUM="3069924eb7041ccc0f2aeceb7d8626793a1a073a5b739a840d7974a18ebeb26cc3374cc5f4a3ffc74d3b019c0cb33e3d1fe96296e6663ac75a73c1171811726d"; \
+    TOMCAT_DWNLD_URL="https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz"; \
     \
     mkdir -p "${DOWNLOAD_PATH_TOMCAT}" "${INSTALL_PATH_TOMCAT}"; \
     curl -LfsSo "${DOWNLOAD_PATH_TOMCAT}"/tomcat.tar.gz "${TOMCAT_DWNLD_URL}"; \
@@ -170,22 +168,19 @@ RUN set -eux; \
     \
     echo "SCC generation phase completed";
 
-FROM base-image AS instanton-ldconfig
-
 # For InstantOn, generate instanton.ld.so.cache which excludes glibc-hwcaps directories.
-# This is done in an intermediate stage to avoid modifying the base image.
 # ldconfig output example lines:
 #         libcap-ng.so.0 (libc6,64bit) => /lib64/libcap-ng.so.0
 #         libc_malloc_debug.so.0 (libc6,64bit, OS ABI: Linux 3.10.0) => /lib64/libc_malloc_debug.so.0
 #         libc.so.6 (libc6,64bit, hwcap: "power10", OS ABI: Linux 3.10.0) => /lib64/glibc-hwcaps/power10/libc.so.6
 # sed regexp filter should pass any line that looks as follows: ... => /.../glibc-hwcaps/...
 RUN glibc_hwcaps_dirs=$(ldconfig --print-cache | sed --regexp-extended --silent 's,^.+[[:space:]]+=>[[:space:]]+(/.+/glibc-hwcaps)/.+$,\1,p' | sort | uniq) \
-    && for d in $glibc_hwcaps_dirs; do rm -rf $d; done \
-    && ldconfig
-
-FROM base-image
-
-COPY --from=instanton-ldconfig /etc/ld.so.cache /etc/instanton.ld.so.cache
+    && mv -v /etc/ld.so.cache /etc/ld.so.cache.orig \
+    && for d in $glibc_hwcaps_dirs; do mv -v $d $d-hidden; done \
+    && ldconfig \
+    && mv -v /etc/ld.so.cache /etc/instanton.ld.so.cache \
+    && for d in $glibc_hwcaps_dirs; do mv -v $d-hidden $d; done \
+    && mv -v /etc/ld.so.cache.orig /etc/ld.so.cache
 
 CMD ["jshell"]
 USER 1001

@@ -1,4 +1,4 @@
-# (C) Copyright IBM Corporation 2025, 2025
+# (C) Copyright IBM Corporation 2024, 2024
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
@@ -23,26 +23,26 @@ RUN apt-get update \
     && locale-gen en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_VERSION 17.0.14.0
+ENV JAVA_VERSION 21.0.4.0
 
 RUN set -eux; \
     ARCH="$(dpkg --print-architecture)"; \
     case "${ARCH}" in \
        aarch64|arm64) \
-         ESUM='75494ba0397275232bfd06d5f2e0be75549db96cc0a3c5cfdcd02eb0f2d8d1dc'; \
-         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.14%2B7_openj9-0.49.0/ibm-semeru-certified-jdk_aarch64_linux_17.0.14.0.tar.gz'; \
+         ESUM='24fb095d40df9c34b8df903e06363189d3f7728349d27f7379fcbe75be356bb4'; \
+         BINARY_URL='https://github.com/ibmruntimes/semeru21-certified-binaries/releases/download/jdk-21.0.4%2B7_openj9-0.46.0/ibm-semeru-certified-jre_aarch64_linux_21.0.4.0.tar.gz'; \
          ;; \
        amd64|x86_64) \
-         ESUM='35bb5c68ee904a94530161ec7b267ba01c8a6cb6f9b95b13531b4f4455b66b4b'; \
-         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.14%2B7_openj9-0.49.0/ibm-semeru-certified-jdk_x64_linux_17.0.14.0.tar.gz'; \
+         ESUM='bb22e5cd4c392ac3887927858449081755831100c114984fb5e2971afd59662f'; \
+         BINARY_URL='https://github.com/ibmruntimes/semeru21-certified-binaries/releases/download/jdk-21.0.4%2B7_openj9-0.46.0/ibm-semeru-certified-jre_x64_linux_21.0.4.0.tar.gz'; \
          ;; \
        ppc64el|ppc64le) \
-         ESUM='a86d611b893c1d72f4c7a26585dc49bc4642aefc82117630dbe7912f51c7c398'; \
-         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.14%2B7_openj9-0.49.0/ibm-semeru-certified-jdk_ppc64le_linux_17.0.14.0.tar.gz'; \
+         ESUM='f49a2880cdaa2634f5bc737db4d8466578c882f9b995fd075327c5f02e723e2e'; \
+         BINARY_URL='https://github.com/ibmruntimes/semeru21-certified-binaries/releases/download/jdk-21.0.4%2B7_openj9-0.46.0/ibm-semeru-certified-jre_ppc64le_linux_21.0.4.0.tar.gz'; \
          ;; \
        s390x) \
-         ESUM='3307712de29e947a0f2363f877603e3a6c3d563c765bcc1cf748d90aa3deee6d'; \
-         BINARY_URL='https://github.com/ibmruntimes/semeru17-certified-binaries/releases/download/jdk-17.0.14%2B7_openj9-0.49.0/ibm-semeru-certified-jdk_s390x_linux_17.0.14.0.tar.gz'; \
+         ESUM='f5392b639e91a78dbd7c67bf0682d7d985bd6d14159f61027ea223f61ac70ae0'; \
+         BINARY_URL='https://github.com/ibmruntimes/semeru21-certified-binaries/releases/download/jdk-21.0.4%2B7_openj9-0.46.0/ibm-semeru-certified-jre_s390x_linux_21.0.4.0.tar.gz'; \
          ;; \
        *) \
          echo "Unsupported arch: ${ARCH}"; \
@@ -55,7 +55,7 @@ RUN set -eux; \
     cd /opt/ibm/; \
     tar -xf /tmp/openjdk.tar.gz ; \
     mkdir -p /licenses; \
-    mv /opt/ibm/jdk-17* /opt/ibm/java; \
+    mv /opt/ibm/jdk-21* /opt/ibm/java; \
     cp /opt/ibm/java/legal/java.base/license/license_en.txt /licenses; \
     rm -rf /tmp/openjdk.tar.gz;
 
@@ -64,7 +64,7 @@ ENV JAVA_HOME=/opt/ibm/java \
 ENV JAVA_TOOL_OPTIONS="-XX:+IgnoreUnrecognizedVMOptions -XX:+PortableSharedCache -XX:+IdleTuningGcOnIdle -Xshareclasses:name=openj9_system_scc,cacheDir=/opt/java/.scc,readonly,nonFatal"
 
 # Create OpenJ9 SharedClassCache (SCC) for bootclasses to improve the java startup.
-# Downloads and runs tomcat to geSCC for bootclasses at /opt/java/.scc/openj9_system_scc
+# Downloads and runs tomcat to generate SCC for bootclasses at /opt/java/.scc/openj9_system_scc
 # Does a dry-run and calculates the optimal cache size and recreates the cache with the appropriate size.
 # With SCC, OpenJ9 startup is improved ~50% with an increase in image size of ~14MB
 # Application classes can be create a separate cache layer with this as the base for further startup improvement
@@ -74,8 +74,8 @@ RUN set -eux; \
     SCC_SIZE="50m"; \
     DOWNLOAD_PATH_TOMCAT=/tmp/tomcat; \
     INSTALL_PATH_TOMCAT=/opt/tomcat-home; \
-    TOMCAT_CHECKSUM="cbe407f17c813d9f83cab459e603df171f2e5782c3a0cdb4cfa00b0391a89cedf865c6d8972fc7e12210c69a8467ede5939f35bb0f3b41fa173b9ee83199768a"; \
-    TOMCAT_DWNLD_URL="https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.102/bin/apache-tomcat-9.0.102.tar.gz"; \
+    TOMCAT_CHECKSUM="3069924eb7041ccc0f2aeceb7d8626793a1a073a5b739a840d7974a18ebeb26cc3374cc5f4a3ffc74d3b019c0cb33e3d1fe96296e6663ac75a73c1171811726d"; \
+    TOMCAT_DWNLD_URL="https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.93/bin/apache-tomcat-9.0.93.tar.gz"; \
     \
     mkdir -p "${DOWNLOAD_PATH_TOMCAT}" "${INSTALL_PATH_TOMCAT}"; \
     curl -LfsSo "${DOWNLOAD_PATH_TOMCAT}"/tomcat.tar.gz "${TOMCAT_DWNLD_URL}"; \
@@ -112,4 +112,3 @@ RUN set -eux; \
     \
     echo "SCC generation phase completed";
 
-CMD ["jshell"]
