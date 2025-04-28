@@ -17,7 +17,7 @@ FROM mcr.microsoft.com/windows/nanoserver:1809
 
 SHELL ["cmd", "/s", "/c"]
 
-ENV JAVA_VERSION jdk-11.0.25+9_openj9-0.48.0
+ENV JAVA_VERSION jdk-11.0.26+4_openj9-0.49.0
 
 ENV JAVA_HOME C:\\openjdk-11
 
